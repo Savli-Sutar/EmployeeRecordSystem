@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include<stdlib.h> // For the function malloc() and free()
 // Using struct to using different datatypes to store different data
+#include<string.h>
 struct Employee {
     int id;
     char name[50];
@@ -12,21 +13,84 @@ struct Employee {
 void inputDetails(struct Employee * ptr, int n);
 void sortByExperience(struct Employee * ptr, int n);
 void displayEmployees(struct Employee * ptr, int n);
+void searchById(struct Employee * ptr, int n, int targetId);
+int deleteEmployee(struct Employee * ptr,int n, int targetId);
 
 int main(){
-    int n;
+    int n, choice, searchId;
     struct Employee *ptr;
     printf("Enter number of employees: ");
     scanf("%d", &n);
     // the malloc measures the amount of employees there are (n), and allocaates that much memory only
     ptr = (struct Employee*) malloc(n * sizeof(struct Employee));
     if(ptr == NULL){
-        return 1;
+        printf("Memory allocation failed\n");
+        return 1; // tells the system the operation failed
     }
     //Calling the function
     inputDetails(ptr,n);
-    sortByExperience(ptr,n);
-    displayEmployees(ptr,n);
+    do{
+        printf("\n......Employee Record System......");
+        printf("\n 1. Display all Employees (Sorted by experience) ");
+        printf("\n 2. Search Employee by Id");
+        printf("\n 3. Add a new Employee");
+        printf("\n 4. Remove Employee");
+        printf("\n 5. Exit");
+        printf("\n Select an option\n");
+        scanf("%d",&choice);
+
+        switch (choice) {
+            case 1:
+            sortByExperience(ptr, n);
+            displayEmployees(ptr, n);
+            break;
+
+            case 2:
+            printf("Enter Employee Id:\n ");
+            scanf("%d",&searchId);
+            searchById(ptr,n,searchId);
+            break;
+
+            case 3:
+            n++; // Increases the amount of employees
+            //realloc changes the size of previously assigned memory block(increases in this case)
+            ptr = (struct Employee*) realloc(ptr, n * sizeof(struct Employee));
+            if (ptr == NULL){
+                printf("Memory Allocation failed. \n System out of resources\n");
+                return 1; // tells the system the operation failed
+            }
+            printf("\nEnter details for the new employee:\n");
+            // Using (ptr + n -1) to point to the newly created slot
+            inputDetails(ptr + (n - 1), 1);
+            printf("Employee added successfully!\n");
+            break;
+
+            case 4:
+        printf("Enter Id to delete: ");
+        scanf("%d", &searchId);
+        int new_n = deleteEmployee(ptr, n, searchId);
+    
+        if (new_n != n) { // If someone was actually deleted
+        n = new_n;
+        if (n > 0) { 
+            ptr = (struct Employee*) realloc(ptr, n * sizeof(struct Employee));
+        } else {
+            // If the last employee was deleted, free the pointer
+            free(ptr);
+            ptr = NULL; 
+        }
+    }
+    break;
+
+            case 5:
+            printf(" Exiting the program...\n");
+            break;
+
+            default:
+            printf("Invalid choice! Please try again.\n");
+
+        }
+    } while(choice != 5);
 
      free(ptr); // Deallocates the previously allocated memory 
     return 0; 
@@ -82,7 +146,42 @@ void displayEmployees(struct Employee * ptr, int n){
     }
 
 }
-   
+void searchById(struct Employee * ptr, int n, int targetId){
+    int found = 0;
+    int i;
+    for(i = 0; i < n; i++){
+        if((ptr + i)->id == targetId){
+        printf("\n......Record Found......\n");
+        printf(" Name: %s | Experience: %.1f years exp | ID: %05d |Salary: %.2f Rs/- | Designation: %s \n",(ptr + i)->name,(ptr + i)->experience,(ptr + i)->id,(ptr +i)->salary,(ptr + i)->designation);
+        found = 1;
+        break;
+
+        }
+    }
+    if(!found){
+        printf("\n Employee with Id %05d not found.\n",targetId);
+    }
+}
+  int deleteEmployee(struct Employee * ptr, int n, int targetId){
+    int foundIndex = -1; // by giving index the initial value -1 indicates the targetId is not present in the list
+    for(int i = 0; i < n; i++){
+        if ((ptr + i)->id == targetId){
+            foundIndex = i; // changes the initial value to the one where the targetId is present
+            break;
+        }
+    }
+    if(foundIndex == -1){
+        printf("Employee Id %05d not found.\n",targetId);
+        return n; // returning original value as nothing was deleted
+        
+    }
+    for (int i = foundIndex; i< n-1 ; i++){
+        *(ptr + i) = *(ptr + i + 1);
+
+    }
+    printf("Employee Id %05d removed successfully.\n",targetId);
+    return n-1; // returning new value as the slot was deleted
+  } 
 
     
     
