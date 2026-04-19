@@ -15,10 +15,13 @@ void sortByExperience(struct Employee * ptr, int n);
 void displayEmployees(struct Employee * ptr, int n);
 void searchById(struct Employee * ptr, int n, int targetId);
 int deleteEmployee(struct Employee * ptr,int n, int targetId);
+void updateEmployee(struct Employee *ptr, int n, int targetId);
+
 
 int main(){
     int n, choice, searchId;
     struct Employee *ptr;
+
     printf("Enter number of employees: ");
     scanf("%d", &n);
     // the malloc measures the amount of employees there are (n), and allocaates that much memory only
@@ -29,15 +32,19 @@ int main(){
     }
     //Calling the function
     inputDetails(ptr,n);
+    // inputing switch cases for menu-driven program
     do{
         printf("\n......Employee Record System......");
         printf("\n 1. Display all Employees (Sorted by experience) ");
         printf("\n 2. Search Employee by Id");
         printf("\n 3. Add a new Employee");
         printf("\n 4. Remove Employee");
-        printf("\n 5. Exit");
+        printf("\n 5. Edit/Update Employee Details");
+        printf("\n 6. Exit");
         printf("\n Select an option\n");
-        scanf("%d",&choice);
+        scanf("%d", &choice);
+    
+        
 
         switch (choice) {
             case 1:
@@ -66,23 +73,29 @@ int main(){
             break;
 
             case 4:
-        printf("Enter Id to delete: ");
-        scanf("%d", &searchId);
-        int new_n = deleteEmployee(ptr, n, searchId);
+            printf("Enter Id to delete: ");
+            scanf("%d", &searchId);
+            int new_n = deleteEmployee(ptr, n, searchId);
     
-        if (new_n != n) { // If someone was actually deleted
-        n = new_n;
-        if (n > 0) { 
-            ptr = (struct Employee*) realloc(ptr, n * sizeof(struct Employee));
-        } else {
+            if (new_n != n) { // If someone was actually deleted
+              n = new_n;
+            if (n > 0) { 
+              ptr = (struct Employee*) realloc(ptr, n * sizeof(struct Employee));
+            } else {
             // If the last employee was deleted, free the pointer
-            free(ptr);
-            ptr = NULL; 
-        }
-    }
-    break;
+               free(ptr);
+               ptr = NULL; 
+             }
+            }
+            break;
 
             case 5:
+            printf("Enter ID to edit: ");
+                scanf("%d", &searchId);
+                updateEmployee(ptr, n, searchId);
+                break;
+
+            case 6:
             printf(" Exiting the program...\n");
             break;
 
@@ -90,11 +103,12 @@ int main(){
             printf("Invalid choice! Please try again.\n");
 
         }
-    } while(choice != 5);
+    } while(choice != 6);
 
      free(ptr); // Deallocates the previously allocated memory 
     return 0; 
 }
+// adds all the data from the user to the system
 void inputDetails(struct Employee * ptr, int n){
     int i;
     for(i = 0; i<n; i++){
@@ -117,6 +131,7 @@ void inputDetails(struct Employee * ptr, int n){
     }
 
 }
+// sorting employee record according to experience
 void sortByExperience(struct Employee * ptr, int n){
     int i,j;
     struct Employee temp;
@@ -136,6 +151,7 @@ void sortByExperience(struct Employee * ptr, int n){
     }
 
 }
+
 void displayEmployees(struct Employee * ptr, int n){
     int i;
     // Display Sorted Employees
@@ -146,6 +162,7 @@ void displayEmployees(struct Employee * ptr, int n){
     }
 
 }
+// searches details of employee with id
 void searchById(struct Employee * ptr, int n, int targetId){
     int found = 0;
     int i;
@@ -162,6 +179,7 @@ void searchById(struct Employee * ptr, int n, int targetId){
         printf("\n Employee with Id %05d not found.\n",targetId);
     }
 }
+// deletes employee record from system
   int deleteEmployee(struct Employee * ptr, int n, int targetId){
     int foundIndex = -1; // by giving index the initial value -1 indicates the targetId is not present in the list
     for(int i = 0; i < n; i++){
@@ -182,6 +200,28 @@ void searchById(struct Employee * ptr, int n, int targetId){
     printf("Employee Id %05d removed successfully.\n",targetId);
     return n-1; // returning new value as the slot was deleted
   } 
+  // updates the details of the existing employees
+  void updateEmployee(struct Employee * ptr, int n, int targetId){
+    int i, found = 0;
+    for(i = 0; i < n; i++) {
+        if((ptr + i)->id == targetId) {
+            found = 1;
+            printf("\nRecord Found! Updating details for %s\n", (ptr + i)->name);
+            
+            printf("Enter New Designation: ");
+            while ((getchar()) != '\n'); // Clear buffer
+            scanf("%[^\n]s", (ptr + i)->designation);
+            
+            printf("Enter New Salary: ");
+            scanf("%f", &(ptr + i)->salary);
+            
+            printf("Record updated successfully!\n");
+            break;
+        }
+    }
+    if(!found) printf("Employee with ID %05d not found.\n", targetId);
+}
+  
 
     
     
